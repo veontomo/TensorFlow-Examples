@@ -7,8 +7,23 @@ Author: Aymeric Damien
 Project: https://github.com/aymericdamien/TensorFlow-Examples/
 '''
 
-from __future__ import print_function
 
+
+# How to use the tensorboard
+# 
+# After the script finishes its execution, the logDir folder (difined in the code below)
+# should contain a file (something like "events.out.tfevents.1494570737.YOUR-NAME").
+# 
+# From the environment from which you have just executed this python script, type 
+# 
+# tensorboard --logdir=path-to-the-above-mentioned-log-folder --port 6006
+# 
+# and see the url that you should connect to see the tensorboard panel. 
+# Open the tab called "GRAPHS" and see the generated graphs.
+#
+
+from __future__ import print_function
+import os
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
@@ -17,7 +32,7 @@ import tensorflow as tf
 
 # Parameters
 learning_rate = 0.001
-training_epochs = 15
+training_epochs = 5
 batch_size = 100
 display_step = 1
 
@@ -31,6 +46,8 @@ n_classes = 10 # MNIST total classes (0-9 digits)
 x = tf.placeholder("float", [None, n_input])
 y = tf.placeholder("float", [None, n_classes])
 
+
+logDir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + "/log/"
 
 # Create model
 def multilayer_perceptron(x, weights, biases):
@@ -69,6 +86,7 @@ init = tf.global_variables_initializer()
 # Launch the graph
 with tf.Session() as sess:
     sess.run(init)
+    writer =  tf.summary.FileWriter(logDir, sess.graph)
 
     # Training cycle
     for epoch in range(training_epochs):
@@ -87,7 +105,7 @@ with tf.Session() as sess:
             print("Epoch:", '%04d' % (epoch+1), "cost=", \
                 "{:.9f}".format(avg_cost))
     print("Optimization Finished!")
-
+    writer.close()
     # Test model
     correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
     # Calculate accuracy
