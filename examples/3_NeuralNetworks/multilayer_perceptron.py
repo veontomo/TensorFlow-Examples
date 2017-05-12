@@ -32,7 +32,7 @@ import tensorflow as tf
 
 # Parameters
 learning_rate = 0.001
-training_epochs = 5
+training_epochs = 1
 batch_size = 100
 display_step = 1
 
@@ -43,8 +43,8 @@ n_input = 784 # MNIST data input (img shape: 28*28)
 n_classes = 10 # MNIST total classes (0-9 digits)
 
 # tf Graph input
-x = tf.placeholder("float", [None, n_input])
-y = tf.placeholder("float", [None, n_classes])
+x = tf.placeholder("float", [None, n_input], name="input_data")
+y = tf.placeholder("float", [None, n_classes], name="label")
 
 
 logDir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + "/log/"
@@ -52,7 +52,7 @@ logDir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + "/log/
 # Create model
 def multilayer_perceptron(x, weights, biases):
     # Hidden layer with RELU activation
-    layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
+    layer_1 = tf.add(tf.matmul(x, weights['h1'], name="layer_1_mult"), biases['b1'])
     layer_1 = tf.nn.relu(layer_1)
     # Hidden layer with RELU activation
     layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
@@ -63,14 +63,14 @@ def multilayer_perceptron(x, weights, biases):
 
 # Store layers weight & bias
 weights = {
-    'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
-    'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
-    'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
+    'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1]), name="weight_layer_1"),
+    'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2]), name="weight_layer_2"),
+    'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]), name="weight_out")
 }
 biases = {
-    'b1': tf.Variable(tf.random_normal([n_hidden_1])),
-    'b2': tf.Variable(tf.random_normal([n_hidden_2])),
-    'out': tf.Variable(tf.random_normal([n_classes]))
+    'b1': tf.Variable(tf.random_normal([n_hidden_1]), name="bias_1"),
+    'b2': tf.Variable(tf.random_normal([n_hidden_2]), name="bias_2"),
+    'out': tf.Variable(tf.random_normal([n_classes]), name="bias_out")
 }
 
 # Construct model
@@ -78,7 +78,7 @@ pred = multilayer_perceptron(x, weights, biases)
 
 # Define loss and optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, name="Optimizer").minimize(cost)
 
 # Initializing the variables
 init = tf.global_variables_initializer()
